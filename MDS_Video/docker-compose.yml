@@ -1,0 +1,39 @@
+version: "3.3"
+
+services:
+  mds_video:
+    image: mds_video
+    container_name: mds_video
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 4004:4004
+    #runtime: nvidia
+    #ipc: host
+    #network_mode: host
+    shm_size: 1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      stack:
+        soft: 67108864
+        hard: 67108864
+    #command: "python3 app.py"
+    command: gunicorn -w 1 -t 10000 --bind 0.0.0.0:4004 app:app
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6000:6000"
+    command: redis-server --port 6000 --daemonize yes    
+  supervisor:
+    build: .
+    container_name: supervisor
+    volumes:
+      - ./supervisord.conf:/etc/supervisord.conf
+    command: supervisord -c /etc/supervisor/conf.d/mds_video.conf
+    depends_on:
+      - redis 
