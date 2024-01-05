@@ -1,0 +1,7 @@
+numpy
+flask
+configparser
+Pillow
+requests
+pywebhdfs
+gunicorn
